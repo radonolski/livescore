@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WM OBS Overlay (No Dots)</title>
+    <title>WM OBS Overlay (Perfect Gradient)</title>
     <style>
         body {
             margin: 0;
@@ -26,6 +26,7 @@
             position: relative;
         }
 
+        /* JETZT NEU: Symmetrischer Farbverlauf, der nach außen links und rechts ausfadet */
         .scoreboard::after {
             content: '';
             position: absolute;
@@ -33,7 +34,16 @@
             left: 5%;
             width: 90%;
             height: 3px;
-            background: linear-gradient(90deg, rgba(255,100,100,1) 0%, rgba(255,200,200,1) 30%, rgba(0,0,0,0) 45%, rgba(0,0,0,0) 55%, rgba(150,255,150,1) 70%, rgba(200,150,255,1) 100%);
+            background: linear-gradient(90deg, 
+                rgba(255,100,100,0) 0%,     /* Ganz links: unsichtbar */
+                rgba(255,100,100,1) 15%,    /* Blendet nach rechts ein */
+                rgba(255,200,200,1) 40%,    /* Stark vor der Mitte */
+                rgba(0,0,0,0) 45%,          /* Pause unterm Logo */
+                rgba(0,0,0,0) 55%,          /* Pause unterm Logo */
+                rgba(150,255,150,1) 60%,    /* Stark nach der Mitte */
+                rgba(200,150,255,1) 85%,    /* Blendet nach rechts aus */
+                rgba(200,150,255,0) 100%    /* Ganz rechts: unsichtbar */
+            );
             border-radius: 5px;
         }
 
@@ -45,16 +55,17 @@
             align-items: center;
             padding: 0 25px;
             border-radius: 25px 10px 10px 25px;
-            font-size: 28px;
+            font-size: 22px; 
             font-weight: bold;
+            white-space: nowrap;
         }
 
         .team-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 140px; /* Leicht verringert, da die Punkte weg sind */           
-            gap: 15px;    /* Abstand zwischen Flagge und Text leicht erhöht */
+            width: 140px;           
+            gap: 15px;    
         }
 
         .team-name {
@@ -112,7 +123,7 @@
 <body>
 
     <div class="scoreboard">
-        <div class="time-box" id="match-time">00:00</div>
+        <div class="time-box" id="match-time">--:--</div>
         
         <div class="team-container">
             <img class="flag" id="team1-flag" src="https://via.placeholder.com/40x26/333/FFF?text=?" alt="Team 1">
@@ -157,8 +168,34 @@
                     const homeTeam = match.competitions[0].competitors[0];
                     const awayTeam = match.competitions[0].competitors[1];
 
-                    document.getElementById('match-time').innerText = status.displayClock || "00:00";
+                    // Zeit-Logik
+                    if (status.type.state === "pre") {
+                        const kickoff = new Date(match.date);
+                        const now = new Date();
+                        const diffMs = kickoff - now;
+
+                        if (diffMs > 0) {
+                            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                            const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                            
+                            if (diffHours >= 24) {
+                                const options = { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' };
+                                document.getElementById('match-time').innerText = kickoff.toLocaleString('de-DE', options);
+                            } else if (diffHours > 0) {
+                                document.getElementById('match-time').innerText = `-${diffHours}h ${diffMins}m`;
+                            } else {
+                                document.getElementById('match-time').innerText = `-${diffMins} Min`;
+                            }
+                        } else {
+                            document.getElementById('match-time').innerText = "Anpfiff";
+                        }
+                    } else if (status.type.name === "STATUS_HALFTIME" || status.type.shortDetail === "HT") {
+                        document.getElementById('match-time').innerText = "Halbzeit";
+                    } else {
+                        document.getElementById('match-time').innerText = status.displayClock || "00:00";
+                    }
                     
+                    // Teams & Scores befüllen
                     document.getElementById('team1-name').innerText = homeTeam.team.abbreviation;
                     document.getElementById('team1-score').innerText = homeTeam.score;
                     document.getElementById('team1-flag').src = homeTeam.team.logo;
@@ -173,7 +210,7 @@
         }
 
         fetchLiveScore();
-        setInterval(fetchLiveScore, 30000);
+        setInterval(fetchLiveScore, 10000); // Sicherer 10-Sekunden-Takt
     </script>
 </body>
 </html>
