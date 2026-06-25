@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WM OBS Overlay (Perfect Gradient)</title>
+    <title>WM OBS Overlay</title>
     <style>
         body {
             margin: 0;
@@ -26,25 +26,68 @@
             position: relative;
         }
 
-        /* JETZT NEU: Symmetrischer Farbverlauf, der nach außen links und rechts ausfadet */
-        .scoreboard::after {
+        .scoreboard-side {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            position: relative;
+        }
+
+        /* RECHTE SEITE: Padding definiert den exakten Abstand der rechten Flagge zum Rand */
+        .scoreboard-side.right {
+            padding-right: 20px; /* Identisch mit dem linken Flaggen-Abstand zur Uhr! */
+        }
+
+        /* DYNAMISCHER TEAM-CONTAINER (Ohne feste Breite!) */
+        .team-container {
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Absolut gleicher Abstand zwischen Flagge und Kürzel auf beiden Seiten */
+        }
+
+        /* Symmetrie-Justierung für die linke Seite */
+        .scoreboard-side.left .team-container {
+            margin-left: 20px;  /* Abstand von der weißen Uhr zur linken Flagge */
+            margin-right: 20px; /* Abstand vom Kürzel (CUW) zur linken Score-Box */
+        }
+
+        /* Symmetrie-Justierung für die rechte Seite */
+        .scoreboard-side.right .team-container {
+            margin-left: 20px;  /* Abstand von der rechten Score-Box zum Kürzel (CIV) */
+        }
+
+        /* UNTERE LINIE LINKS (Verschwindet nahtlos in der Logo-Mitte) */
+        .scoreboard-side.left::after {
             content: '';
             position: absolute;
             bottom: -3px;
-            left: 5%;
-            width: 90%;
+            left: 30px;
+            right: -25px; 
             height: 3px;
             background: linear-gradient(90deg, 
-                rgba(255,100,100,0) 0%,     /* Ganz links: unsichtbar */
-                rgba(255,100,100,1) 15%,    /* Blendet nach rechts ein */
-                rgba(255,200,200,1) 40%,    /* Stark vor der Mitte */
-                rgba(0,0,0,0) 45%,          /* Pause unterm Logo */
-                rgba(0,0,0,0) 55%,          /* Pause unterm Logo */
-                rgba(150,255,150,1) 60%,    /* Stark nach der Mitte */
-                rgba(200,150,255,1) 85%,    /* Blendet nach rechts aus */
-                rgba(200,150,255,0) 100%    /* Ganz rechts: unsichtbar */
+                rgba(235, 65, 65, 0) 0%, 
+                rgba(235, 65, 65, 1) 25%, 
+                rgba(115, 245, 165, 1) 100%
             );
-            border-radius: 5px;
+            border-radius: 5px 0 0 5px;
+            z-index: 1;
+        }
+
+        /* UNTERE LINIE RECHTS (Verschwindet nahtlos in der Logo-Mitte) */
+        .scoreboard-side.right::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: -25px; 
+            right: 30px;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                rgba(240, 240, 120, 1) 0%,   
+                rgba(185, 125, 245, 1) 75%,  
+                rgba(185, 125, 245, 0) 100%  
+            );
+            border-radius: 0 5px 5px 0;
+            z-index: 1;
         }
 
         .time-box {
@@ -60,18 +103,11 @@
             white-space: nowrap;
         }
 
-        .team-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 140px;           
-            gap: 15px;    
-        }
-
         .team-name {
             color: #ffffff;
             font-size: 28px;
             text-transform: uppercase;
+            line-height: 1;
         }
 
         .flag {
@@ -79,7 +115,6 @@
             height: 26px;
             border-radius: 4px;
             object-fit: cover;
-            border: 1px solid #333;
         }
 
         .score-box {
@@ -113,7 +148,7 @@
             font-family: Arial, sans-serif;
             font-weight: bold;
             font-size: 10px;
-            z-index: 3;
+            z-index: 3; 
             box-shadow: 0 0 5px rgba(0,0,0,0.2);
         }
         
@@ -123,20 +158,23 @@
 <body>
 
     <div class="scoreboard">
-        <div class="time-box" id="match-time">--:--</div>
-        
-        <div class="team-container">
-            <img class="flag" id="team1-flag" src="https://via.placeholder.com/40x26/333/FFF?text=?" alt="Team 1">
-            <div class="team-name" id="team1-name">TBA</div>
+        <div class="scoreboard-side left">
+            <div class="time-box" id="match-time">--:--</div>
+            <div class="team-container">
+                <img class="flag" id="team1-flag" src="https://via.placeholder.com/40x26/333/FFF?text=?" alt="Team 1">
+                <div class="team-name" id="team1-name">TBA</div>
+            </div>
+            <div class="score-box" id="team1-score">0</div>
         </div>
 
-        <div class="score-box" id="team1-score">0</div>
         <div class="center-logo"><span>🏆</span>FIFA</div>
-        <div class="score-box" id="team2-score">0</div>
 
-        <div class="team-container">
-            <div class="team-name" id="team2-name">TBA</div>
-            <img class="flag" id="team2-flag" src="https://via.placeholder.com/40x26/333/FFF?text=?" alt="Team 2">
+        <div class="scoreboard-side right">
+            <div class="score-box" id="team2-score">0</div>
+            <div class="team-container">
+                <div class="team-name" id="team2-name">TBA</div>
+                <img class="flag" id="team2-flag" src="https://via.placeholder.com/40x26/333/FFF?text=?" alt="Team 2">
+            </div>
         </div>
     </div>
 
@@ -210,7 +248,7 @@
         }
 
         fetchLiveScore();
-        setInterval(fetchLiveScore, 10000); // Sicherer 10-Sekunden-Takt
+        setInterval(fetchLiveScore, 10000);
     </script>
 </body>
 </html>
