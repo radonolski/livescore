@@ -33,30 +33,25 @@
             position: relative;
         }
 
-        /* RECHTE SEITE: Padding definiert den exakten Abstand der rechten Flagge zum Rand */
         .scoreboard-side.right {
-            padding-right: 20px; /* Identisch mit dem linken Flaggen-Abstand zur Uhr! */
+            padding-right: 20px; 
         }
 
-        /* DYNAMISCHER TEAM-CONTAINER (Ohne feste Breite!) */
         .team-container {
             display: flex;
             align-items: center;
-            gap: 12px; /* Absolut gleicher Abstand zwischen Flagge und Kürzel auf beiden Seiten */
+            gap: 12px;
         }
 
-        /* Symmetrie-Justierung für die linke Seite */
         .scoreboard-side.left .team-container {
-            margin-left: 20px;  /* Abstand von der weißen Uhr zur linken Flagge */
-            margin-right: 20px; /* Abstand vom Kürzel (CUW) zur linken Score-Box */
+            margin-left: 20px; 
+            margin-right: 20px; 
         }
 
-        /* Symmetrie-Justierung für die rechte Seite */
         .scoreboard-side.right .team-container {
-            margin-left: 20px;  /* Abstand von der rechten Score-Box zum Kürzel (CIV) */
+            margin-left: 20px;
         }
 
-        /* UNTERE LINIE LINKS (Verschwindet nahtlos in der Logo-Mitte) */
         .scoreboard-side.left::after {
             content: '';
             position: absolute;
@@ -73,7 +68,6 @@
             z-index: 1;
         }
 
-        /* UNTERE LINIE RECHTS (Verschwindet nahtlos in der Logo-Mitte) */
         .scoreboard-side.right::after {
             content: '';
             position: absolute;
@@ -206,7 +200,6 @@
                     const homeTeam = match.competitions[0].competitors[0];
                     const awayTeam = match.competitions[0].competitors[1];
 
-                    // Zeit-Logik
                     if (status.type.state === "pre") {
                         const kickoff = new Date(match.date);
                         const now = new Date();
@@ -235,7 +228,6 @@
                         document.getElementById('match-time').innerText = status.displayClock || "00:00";
                     }
                     
-                    // Teams & Scores befüllen
                     document.getElementById('team1-name').innerText = homeTeam.team.abbreviation;
                     document.getElementById('team1-score').innerText = homeTeam.score;
                     document.getElementById('team1-flag').src = homeTeam.team.logo;
