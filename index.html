@@ -228,7 +228,9 @@
                             document.getElementById('match-time').innerText = "Anpfiff";
                         }
                     } else if (status.type.name === "STATUS_HALFTIME" || status.type.shortDetail === "HT") {
-                        document.getElementById('match-time').innerText = "Halbzeit";
+                        document.getElementById('match-time').innerText = "HT";
+                    } else if (status.type.name === "STATUS_FINAL" || status.type.shortDetail === "FT") {
+                        timeBox.firstChild.textContent = "FT ";
                     } else {
                         document.getElementById('match-time').innerText = status.displayClock || "00:00";
                     }
