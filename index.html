@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WM OBS Overlay</title>
+    <style>
+        /* Grund-Setup für OBS (Transparenter Hintergrund) */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: transparent; 
+            font-family: 'Arial Black', Impact, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 50px;
+        }
+
+        /* Hauptcontainer für das Overlay */
+        .scoreboard {
+            display: flex;
+            align-items: center;
+            background-color: #000000;
+            border-radius: 25px;
+            height: 60px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* Bunte Linie unter dem Scoreboard (wie im Bild) */
+        .scoreboard::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 5%;
+            width: 90%;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(255,100,100,1) 0%, rgba(255,200,200,1) 30%, rgba(0,0,0,0) 45%, rgba(0,0,0,0) 55%, rgba(150,255,150,1) 70%, rgba(200,150,255,1) 100%);
+            border-radius: 5px;
+        }
+
+        /* Zeit-Anzeige (weißes Element links) */
+        .time-box {
+            background-color: #ffffff;
+            color: #000000;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-radius: 25px 10px 10px 25px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* Container für die Teams */
+        .team-container {
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 10px;
+        }
+
+        .team-name {
+            color: #ffffff;
+            font-size: 28px;
+            text-transform: uppercase;
+        }
+
+        /* Die kleinen farbigen Punkte neben den Namen */
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot.blue { background-color: #88b7ff; }
+        .dot.dark { background-color: #333333; border: 1px solid #666; }
+
+        /* Flaggen */
+        .flag {
+            width: 40px;
+            height: 26px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid #333;
+        }
+
+        /* Score-Anzeige (grüne Boxen in der Mitte) */
+        .score-box {
+            background-color: #90f3c5;
+            color: #000;
+            font-size: 32px;
+            padding: 5px 15px;
+            border-radius: 12px;
+            margin: 0 5px;
+            z-index: 2;
+        }
+
+        /* WM/FIFA Logo in der absoluten Mitte */
+        .center-logo {
+            background-color: #ffffff;
+            height: 70px; /* Steht etwas über */
+            width: 50px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 10px;
+            z-index: 3;
+            margin: 0 -5px; /* Zieht die Score-Boxen näher ran */
+        }
+        
+        .center-logo span { font-size: 24px; line-height: 1; }
+
+    </style>
+</head>
+<body>
+
+    <div class="scoreboard">
+        <div class="time-box" id="match-time">00:00</div>
+        
+        <div class="team-container">
+            <img class="flag" id="team1-flag" src="https://via.placeholder.com/40x26/0000FF/FFFFFF?text=T1" alt="Team 1">
+            <div class="dot blue"></div>
+            <div class="team-name" id="team1-name">TBA</div>
+        </div>
+
+        <div class="score-box" id="team1-score">0</div>
+        
+        <div class="center-logo">
+            <span>🏆</span>
+            FIFA
+        </div>
+        
+        <div class="score-box" id="team2-score">0</div>
+
+        <div class="team-container">
+            <div class="team-name" id="team2-name">TBA</div>
+            <div class="dot dark"></div>
+            <img class="flag" id="team2-flag" src="https://via.placeholder.com/40x26/008000/FFFFFF?text=T2" alt="Team 2">
+        </div>
+    </div>
+
+    <script>
+        async function fetchLiveScore() {
+            try {
+                // Holt alle aktuellen Fußballspiele von der ESPN API
+                const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard');
+                const data = await response.json();
+                
+                // Wir nehmen das ERSTE Spiel in der Liste (Index 0). 
+                // Wenn kein Spiel läuft, gibt es einen Fehler in der Konsole, aber das Layout bleibt.
+                if(data.events && data.events.length > 0) {
+                    const match = data.events[0];
+                    const status = match.status;
+                    const homeTeam = match.competitions[0].competitors[0];
+                    const awayTeam = match.competitions[0].competitors[1];
+
+                    // Zeit aktualisieren
+                    document.getElementById('match-time').innerText = status.displayClock;
+
+                    // Team 1 (Links - Home)
+                    document.getElementById('team1-name').innerText = homeTeam.team.abbreviation;
+                    document.getElementById('team1-score').innerText = homeTeam.score;
+                    document.getElementById('team1-flag').src = homeTeam.team.logo;
+
+                    // Team 2 (Rechts - Away)
+                    document.getElementById('team2-name').innerText = awayTeam.team.abbreviation;
+                    document.getElementById('team2-score').innerText = awayTeam.score;
+                    document.getElementById('team2-flag').src = awayTeam.team.logo;
+                }
+            } catch (error) {
+                console.error("Fehler beim Abrufen der Live-Daten:", error);
+            }
+        }
+
+        // Führt die Funktion sofort aus...
+        fetchLiveScore();
+        // ...und dann alle 30 Sekunden (30000 Millisekunden) automatisch wieder
+        setInterval(fetchLiveScore, 30000);
+    </script>
+</body>
+</html>
