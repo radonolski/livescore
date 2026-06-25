@@ -214,7 +214,7 @@
 
         // Die Kern-Animationsfunktion
         function triggerGoalAnimation() {
-            if (isAnimating) return; // Verhindert Spam-Klicks während der Animation
+            if (isAnimating) return; 
             isAnimating = true;
 
             const banner = document.getElementById('goal-banner');
@@ -223,7 +223,7 @@
                 
                 setTimeout(() => {
                     banner.classList.remove('active');
-                    setTimeout(() => { isAnimating = false; }, 600); // Reset nach dem Einfahren
+                    setTimeout(() => { isAnimating = false; }, 600); 
                 }, 5000);
             }
         }
@@ -291,7 +291,7 @@
                     } else if (status.type.name === "STATUS_HALFTIME" || status.type.shortDetail === "HT") {
                         timeText = "HT";
                     } else if (status.type.name === "STATUS_FINAL" || status.type.shortDetail === "FT") {
-                        timeBox.firstChild.textContent = "FT ";
+                        timeText = "FT"; // REPARIERT: Nutzt jetzt die Variable wie alle anderen Status-Typen
                     } else {
                         timeText = status.displayClock || "00:00";
                     }
