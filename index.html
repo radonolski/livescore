@@ -229,12 +229,6 @@
             }
         }
 
-        // NEU: Tastatur-Trigger (Taste 'T' drücken)
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 't' || event.key === 'T') {
-                triggerGoalAnimation();
-            }
-        });
 
         async function fetchLiveScore() {
             try {
